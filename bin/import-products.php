@@ -31,9 +31,24 @@ $writer    = new DatabaseWriter($pdo, $headers);
 $runner = new ImportRunner($reader, $mapper, $validator, $writer);
 $report = $runner->run();
 
+$stats = $writer->getStats();
+
+echo "\n--- PERFORMANCE ---\n";
+echo "Queries: {$stats['queries']}\n";
+echo "Time: {$stats['time_seconds']} sec\n";
+
+
 echo "Processed: {$report->processed}\n";
 echo "Imported:  {$report->imported}\n";
 echo "Skipped:   {$report->skipped}\n";
+echo "Errors:\n";
 
-// 7. Exit
+//if (empty($report->errors)) {
+//    echo "- none\n";
+//} else {
+//    foreach ($report->errors as $error) {
+//        echo "- " . json_encode($error) . "\n";
+//    }
+//}
+
 exit($report->skipped > 0 ? 2 : 0);

@@ -32,8 +32,10 @@ final class ProductMapper implements MapperInterface
             $values = [];
 
             foreach ($sampleRows as $row) {
-                if (!empty($row[$index])) {
-                    $values[] = trim((string) $row[$index]);
+                $value = $row[$index] ?? null;
+
+                if (!empty($value)) {
+                    $values[] = trim((string) $value);
                 }
             }
 
@@ -57,16 +59,30 @@ final class ProductMapper implements MapperInterface
         $this->initializeTransformations();
     }
 
+    private function normalizeRow(array $row): array
+    {
+        $normalized = [];
+
+        foreach ($this->headers as $index => $header) {
+            $column = strtolower(trim($header));
+            $normalized[$column] = $row[$index] ?? null;
+        }
+
+        return $normalized;
+    }
 
     public function map(array $row): array
     {
         $this->ensureInitialized();
-        $mapped = [];
-        $headers = array_keys($this->transformations);
 
-        foreach ($headers as $index => $column) {
-            $value = $row[$index] ?? null;
-            $mapped[':' . $column] = $this->transformations[$column]($value);
+        $row = $this->normalizeRow($row);
+
+        $mapped = [];
+
+        foreach ($this->transformations as $column => $transformer) {
+            $value = $row[$column] ?? null;
+
+            $mapped[$column] = $transformer($value);
         }
 
         return $mapped;

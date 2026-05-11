@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: file-importer-app
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:latest
+    container_name: file-importer-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8
+    container_name: file-importer-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: file_importer
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"

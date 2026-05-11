@@ -13,7 +13,7 @@ final class ProductValidator implements ValidatorInterface
             throw new RuntimeException('Row is empty');
         }
 
-        if ($data[':price'] < 0) {
+        if ($data['price'] < 0) {
             throw new RuntimeException('Price must be positive');
         }
     }
